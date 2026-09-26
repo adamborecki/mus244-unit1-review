@@ -403,6 +403,49 @@ a {
   display: none !important;
 }
 
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(9, 20, 15, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.confirm-overlay.hidden {
+  display: none;
+}
+
+.confirm-dialog {
+  width: min(360px, 100%);
+  background: var(--surface-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 32%, transparent);
+}
+
+.confirm-dialog h3 {
+  margin: 0 0 0.4rem;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.confirm-dialog p {
+  margin: 0 0 0.9rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 .result-grid {
   margin-top: 0.4rem;
   display: grid;
