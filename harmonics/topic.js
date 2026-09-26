@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'harmonics',
   course: 'MUS 244',
-  title: 'Harmonic Series and FFT',
+  title: '🎵 Harmonic Series and FFT',
   intro:
     'Practice harmonic-series math, overtones, and why Fourier analysis explains timbre and additive synthesis.',
   difficulty: 'Beginner',

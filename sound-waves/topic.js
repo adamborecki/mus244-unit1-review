@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'sound-waves',
   course: 'MUS 244',
-  title: 'Sound Waves Basics',
+  title: '🌊 Sound Waves Basics',
   intro:
     'Review what sound is, how amplitude and frequency work, and how periodic vs aperiodic waves connect to pitch and noise.',
   difficulty: 'Beginner',

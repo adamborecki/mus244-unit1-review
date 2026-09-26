@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'filters',
   course: 'MUS 244',
-  title: 'Filters and EQ Basics',
+  title: '🎚️ Filters and EQ Basics',
   intro:
     'Review low-pass/high-pass ideas, cutoff and resonance, and practical filter/EQ moves used in beginner mixing.',
   difficulty: 'Beginner',
