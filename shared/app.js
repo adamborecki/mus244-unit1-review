@@ -71,6 +71,8 @@
     },
   };
 
+  const sessionId = Math.random().toString(36).slice(2, 8);
+
   init();
 
   function init() {
@@ -80,6 +82,7 @@
     bindQuiz();
     bindDeliverable();
     resetQuiz();
+    logEvent('quiz_start', { totalQuestions: config.quiz.length });
     renderGuided();
     renderQuiz();
     renderStats();
@@ -240,11 +243,93 @@
       renderQuiz();
     });
 
-    elements.restartQuizBtn.addEventListener('click', () => {
+    elements.restartQuizBtn.addEventListener('click', async () => {
+      const hasProgress =
+        state.quiz.index > 0 || state.quiz.answered || state.quiz.finished || state.quiz.score > 0;
+
+      if (hasProgress) {
+        const confirmed = await askConfirm({
+          title: 'Restart the quiz?',
+          body: `You're on question ${Math.min(state.quiz.index + 1, config.quiz.length)}/${config.quiz.length} with a score of ${state.quiz.score}. Restarting clears this attempt (your guided progress and XP are safe).`,
+          confirmLabel: 'Restart Quiz',
+        });
+        if (!confirmed) return;
+      }
+
+      logEvent('quiz_restart', {
+        hadProgress: hasProgress,
+        atQuestion: state.quiz.finished ? config.quiz.length : state.quiz.index + 1,
+        scoreBeforeRestart: state.quiz.score,
+      });
+
       resetQuiz();
       renderQuiz();
       renderStats();
       generateDeliverable();
+    });
+  }
+
+  function ensureConfirmModal() {
+    if (byId('appConfirmOverlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'appConfirmOverlay';
+    overlay.className = 'confirm-overlay hidden';
+    overlay.innerHTML = `
+      <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
+        <h3 id="confirmTitle"></h3>
+        <p id="confirmBody"></p>
+        <div class="confirm-actions">
+          <button class="btn-ghost" type="button" data-confirm-cancel>Cancel</button>
+          <button class="btn" type="button" data-confirm-ok>Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  function askConfirm({ title, body, confirmLabel }) {
+    ensureConfirmModal();
+    const overlay = byId('appConfirmOverlay');
+    const okBtn = overlay.querySelector('[data-confirm-ok]');
+    const cancelBtn = overlay.querySelector('[data-confirm-cancel]');
+
+    overlay.querySelector('#confirmTitle').textContent = title;
+    overlay.querySelector('#confirmBody').textContent = body;
+    okBtn.textContent = confirmLabel || 'Confirm';
+
+    return new Promise((resolve) => {
+      function cleanup(result) {
+        overlay.classList.add('hidden');
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        overlay.removeEventListener('keydown', onKey);
+        overlay.removeEventListener('click', onBackdrop);
+        resolve(result);
+      }
+
+      function onOk() {
+        cleanup(true);
+      }
+
+      function onCancel() {
+        cleanup(false);
+      }
+
+      function onKey(event) {
+        if (event.key === 'Escape') cleanup(false);
+      }
+
+      function onBackdrop(event) {
+        if (event.target === overlay) cleanup(false);
+      }
+
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      overlay.addEventListener('keydown', onKey);
+      overlay.addEventListener('click', onBackdrop);
+      overlay.classList.remove('hidden');
+      okBtn.focus();
     });
   }
 
@@ -369,6 +454,16 @@
     }
 
     awardXp(40);
+
+    logEvent('quiz_finish', {
+      score: state.quiz.score,
+      total: config.quiz.length,
+      percent: quizPercent(),
+      elapsedSeconds: state.quiz.elapsedSeconds,
+      bestStreak: state.bestStreak,
+      badges: Array.from(state.badges),
+    });
+
     renderQuiz();
     renderStats();
     generateDeliverable();
@@ -513,6 +608,36 @@
   function cleanValue(value, fallback) {
     const trimmed = value.trim();
     return trimmed || fallback;
+  }
+
+  function logEvent(type, detail) {
+    const base = {
+      session: sessionId,
+      module: config.slug,
+      type,
+      ts: new Date().toISOString(),
+      ...detail,
+    };
+    const hash = shortHash(JSON.stringify(base));
+    const record = { ...base, hash };
+    console.log(`[MUS244] ${JSON.stringify(record)}`);
+    return record;
+  }
+
+  // cyrb53: small, fast, non-cryptographic string hash. Good enough to flag an
+  // obviously-edited console log line, not to stop a determined student.
+  function shortHash(str) {
+    let h1 = 0xdeadbeef;
+    let h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i += 1) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    const combined = 4294967296 * (2097151 & h2) + (h1 >>> 0);
+    return combined.toString(16).slice(0, 8);
   }
 
   function shuffle(arr) {
