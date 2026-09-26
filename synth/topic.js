@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'synth',
   course: 'MUS 244',
-  title: 'Synthesis Fundamentals',
+  title: '🎹 Synthesis Fundamentals',
   intro:
     'Compare synthesis vs sampling, then review the subtractive synthesis chain and common oscillator waveforms.',
   difficulty: 'Beginner',

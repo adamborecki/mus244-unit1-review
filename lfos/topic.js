@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'lfos',
   course: 'MUS 244',
-  title: 'LFO Modulation Lab',
+  title: '🔁 LFO Modulation Lab',
   intro:
     'Learn how low-frequency oscillators create repeating movement in pitch, filter, and amplitude for subtractive synth patches.',
   difficulty: 'Beginner',

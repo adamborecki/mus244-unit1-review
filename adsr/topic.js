@@ -1,7 +1,7 @@
 window.LEARN_APP_CONFIG = {
   slug: 'adsr',
   course: 'MUS 244',
-  title: 'ADSR Envelope Lab',
+  title: '📈 ADSR Envelope Lab',
   intro:
     'Practice Attack, Decay, Sustain, and Release so you can shape note behavior clearly in subtractive synthesis.',
   difficulty: 'Beginner',
